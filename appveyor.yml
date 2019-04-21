@@ -4,7 +4,7 @@ version: 0.6.3-{build}
 
 configuration: Release
 image: Visual Studio 2017
-platform: x64
+platform: x86
 
 environment:
     BINTRAY_APIKEY:
@@ -16,7 +16,7 @@ build:
     verbosity: minimal
 
 install:
-    - set QT_DIR=C:\Qt\5.10.1\msvc2017_64
+    - set QT_DIR=C:\Qt\5.10.1\msvc2017
     - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin
     - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -141,5 +141,5 @@ deploy:
         appveyor_repo_tag: true
 
 artifacts:
-    - path: nheko_win_64.zip
+    - path: nheko_win_32.zip
     - path: nheko-$(APPVEYOR_REPO_TAG_NAME)-installer.exe
