@@ -4,7 +4,9 @@ version: 0.6.3-{build}
 
 configuration: Release
 image: Visual Studio 2017
-platform: x86
+platform:
+    - x64
+    - x86
 
 environment:
     BINTRAY_APIKEY:
@@ -16,7 +18,7 @@ build:
     verbosity: minimal
 
 install:
-    - set QT_DIR=C:\Qt\5.10.1\msvc2017
+    - if "%PLATFORM%"=="x86" set QT_DIR=C:\Qt\5.10.1\msvc2017 else set QT_DIR=C:\Qt\5.10.1\msvc2017_64
     - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin
     - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -53,14 +55,16 @@ build_script:
     - echo %DATE%
 
     # Build & install the dependencies
-    - cmake -G "Visual Studio 15 2017 Win64" -Hdeps -B.deps
+    - if "%PLATFORM%"=="x86" set VS_VERSION=Win32 else set VS_VERSION=Win64
+    - echo %PLATFORM%
+    - cmake -G "Visual Studio 15 2017 %VS_VERSION%" -Hdeps -B.deps
         -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
         -DUSE_BUNDLED_BOOST=OFF
     - cmake --build .deps --config Release
 
     # Build nheko
     - rm -f cmake/FindOlm.cmake
-    - cmake -G "Visual Studio 15 2017 Win64" -H. -Bbuild
+    - cmake -G "Visual Studio 15 2017 %VS_VERSION%" -H. -Bbuild
       -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
       -DLMDBXX_INCLUDE_DIR=.deps/usr/include
       -DTWEENY_INCLUDE_DIR=.deps/usr/include
@@ -82,7 +86,7 @@ after_build:
     - copy C:\projects\nheko\.deps\usr\lib\cmark.lib .\NhekoRelease\
     - copy C:\projects\nheko\.deps\usr\bin\cmark.dll .\NhekoRelease\
 
-    - 7z a nheko_win_64.zip .\NhekoRelease\*
+    - 7z a nheko_win_%PLATFORM%.zip .\NhekoRelease\*
     - ls -lh build\Release\
     - ls -lh NhekoRelease\
     - mkdir NhekoData
@@ -122,24 +126,24 @@ after_build:
     - curl -L -O https://download.qt.io/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe
     - 7z x QtInstallerFramework-win-x86.exe -otools -aoa
     - set PATH=%BUILD%\tools\bin;%PATH%
-    - binarycreator.exe -f -c installer\config\config.xml -p installer\packages nheko-installer.exe
+    - binarycreator.exe -f -c installer\config\config.xml -p installer\packages nheko-installer-%PLATFORM%.exe
 
-    - mv nheko-installer.exe nheko-%APPVEYOR_REPO_TAG_NAME%-installer.exe
+    - mv nheko-installer-%PLATFORM%.exe nheko-%APPVEYOR_REPO_TAG_NAME%-installer-%PLATFORM%.exe
 
 on_success:
-    - if "%APPVEYOR_REPO_TAG%" == "true" (curl -T nheko-%APPVEYOR_REPO_TAG_NAME%-installer.exe -uredsky17:%BINTRAY_APIKEY% https://api.bintray.com/content/nheko-reborn/nheko/%APPVEYOR_REPO_TAG_NAME%/nheko/%APPVEYOR_REPO_TAG_NAME%/)
+    - if "%APPVEYOR_REPO_TAG%" == "true" (curl -T nheko-%APPVEYOR_REPO_TAG_NAME%-installer-%PLATFORM%.exe -uredsky17:%BINTRAY_APIKEY% https://api.bintray.com/content/nheko-reborn/nheko/%APPVEYOR_REPO_TAG_NAME%/nheko/%APPVEYOR_REPO_TAG_NAME%/)
 
 deploy:
     description: "Development builds"
     provider: GitHub
     auth_token:
         secure: "ShStWeqp+TkYqJPQr7uFZb+B8ZTgC7Iwth+IkhjfRDCTLhy8gtWvlPzlQilder3E"
-    artifact: nheko-${APPVEYOR_REPO_TAG_NAME}-installer.exe
+    artifact: nheko-${APPVEYOR_REPO_TAG_NAME}-installer-%PLATFORM%.exe
     force_update: true
     prerelease: true
     on:
         appveyor_repo_tag: true
 
 artifacts:
-    - path: nheko_win_32.zip
-    - path: nheko-$(APPVEYOR_REPO_TAG_NAME)-installer.exe
+    - path: nheko_win_%PLATFORM%.zip
+    - path: nheko-$(APPVEYOR_REPO_TAG_NAME)-installer-%PLATFORM%.exe
