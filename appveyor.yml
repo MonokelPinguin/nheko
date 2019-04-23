@@ -18,7 +18,7 @@ build:
     verbosity: minimal
 
 install:
-    - if "%PLATFORM%"=="x86" set QT_DIR=C:\Qt\5.10.1\msvc2017 else set QT_DIR=C:\Qt\5.10.1\msvc2017_64
+    - if "%PLATFORM%"=="x86" (set QT_DIR=C:\Qt\5.10.1\msvc2017) else (set QT_DIR=C:\Qt\5.10.1\msvc2017_64)
     - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin
     - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -55,7 +55,7 @@ build_script:
     - echo %DATE%
 
     # Build & install the dependencies
-    - if "%PLATFORM%"=="x86" set VS_VERSION=Win32 else set VS_VERSION=Win64
+    - if "%PLATFORM%"=="x86" set (VS_VERSION=Win32) else (set VS_VERSION=Win64)
     - echo %PLATFORM%
     - cmake -G "Visual Studio 15 2017 %VS_VERSION%" -Hdeps -B.deps
         -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
