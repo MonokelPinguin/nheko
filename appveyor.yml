@@ -55,8 +55,8 @@ build_script:
     - echo %DATE%
 
     # Build & install the dependencies
-    - if "%PLATFORM%"=="x86" set (VS_VERSION=Win32) else (set VS_VERSION=Win64)
-    - echo %PLATFORM%
+    - if "%PLATFORM%"=="x86" (set VS_VERSION=Win32) else (set VS_VERSION=Win64)
+    - echo %VS_VERSION%
     - cmake -G "Visual Studio 15 2017 %VS_VERSION%" -Hdeps -B.deps
         -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
         -DUSE_BUNDLED_BOOST=OFF
